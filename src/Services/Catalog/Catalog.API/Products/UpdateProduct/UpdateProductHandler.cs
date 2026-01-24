@@ -1,19 +1,29 @@
-﻿
-namespace Catalog.API.Products.UpdateProduct;
+﻿namespace Catalog.API.Products.UpdateProduct;
 
 public record UpdateProductCommand(Guid Id, string Name, List<string> Category, string Description, string ImageFile, decimal Price) : ICommand<UpdateProductResult>;
 
 public record UpdateProductResult(bool IsSuccess);
-public class UpdateProductCommandHandler(IDocumentSession session, ILogger<UpdateProductCommandHandler> logger) : ICommandHandler<UpdateProductCommand, UpdateProductResult>
+
+public class CreateProductCommandValidator : AbstractValidator<UpdateProductCommand>
+{
+    public CreateProductCommandValidator()
+    {
+        RuleFor(command => command.Id).NotEmpty().WithMessage("Product ID is required.");
+        RuleFor(command => command.Name).NotEmpty().WithMessage("Product Name is required.").Length(2, 250).WithMessage("Name must be between 2 and 250 characters");
+        RuleFor(command => command.Price).GreaterThan(0).WithMessage("Price must be grater than 0");
+    }
+}
+
+
+public class UpdateProductCommandHandler(IDocumentSession session) : ICommandHandler<UpdateProductCommand, UpdateProductResult>
 {
     public async Task<UpdateProductResult> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
     {
-        logger.LogInformation($"UpdateProductCommandHandler.Handle called with {command}");
         var product = await session.LoadAsync<Product>(command.Id, cancellationToken);
 
         if (product is null)
         {
-            throw new ProductNotFoundException();
+            throw new ProductNotFoundException(command.Id);
         }
 
         product.Name = command.Name;
@@ -28,3 +38,4 @@ public class UpdateProductCommandHandler(IDocumentSession session, ILogger<Updat
         return new UpdateProductResult(true);
     }
 }
+            

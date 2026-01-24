@@ -11,6 +11,18 @@ public record CreateProductCommand(string Name, List<string> Catagory, string De
 // - The handler will construct and return this type to the caller (often a controller or mediator caller).
 public record CreateProductResult(Guid Id); // Result returned after creating a product, contains the new product's Id
 
+public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+{
+    public CreateProductCommandValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Product name is required.");
+        RuleFor(x => x.Catagory).NotEmpty().WithMessage("At least one category is required.");
+        RuleFor(x => x.Description).NotEmpty().WithMessage("Product description is required.");
+        RuleFor(x => x.ImageFile).NotEmpty().WithMessage("Image file is required.");
+        RuleFor(x => x.Price).GreaterThan(0).WithMessage("Price must be greater than zero.");
+    }
+}
+
 // Command handler class responsible for executing the CreateProductCommand.
 // - Primary constructor injects the persistence/session dependency (IDocumentSession).
 // - Implementing ICommandHandler<CreateProductCommand, CreateProductResult> makes this class discoverable by mediator/CQRS infrastructure
@@ -28,13 +40,13 @@ internal class CreateProductCommandHandler(IDocumentSession session) : ICommandH
         // - Apply domain rules
         // (Validation is omitted here for brevity.)
 
-        var product = new Product 
+        var product = new Product
         {
-            Name = command.Name, 
-            Catagory = command.Catagory, 
-            Description = command.Description, 
-            ImageFile = command.ImageFile, 
-            Price = command.Price, 
+            Name = command.Name,
+            Catagory = command.Catagory,
+            Description = command.Description,
+            ImageFile = command.ImageFile,
+            Price = command.Price,
         };
 
         // Persist the new product using the injected document/session.
