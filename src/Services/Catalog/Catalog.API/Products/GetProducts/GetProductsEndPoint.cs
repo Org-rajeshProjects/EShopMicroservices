@@ -1,13 +1,13 @@
 ﻿namespace Catalog.API.Products.GetProducts;
-
+public record GetProductRequest(int? PageNumber, int? PageSize);
 public record GetProductResponse(IEnumerable<Product> Products); // Response DTO containing a list of products returned to the client
 public class GetProductsEndPoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/products", async (ISender sender) =>
+        app.MapGet("/products", async ([AsParameters]GetProductRequest request, ISender sender) =>
         {
-            var query = new GetProductsQuery(); // Create a new query to get products
+            var query = request.Adapt<GetProductsQuery>(); // Create a new query to get products
             var result = await sender.Send(query); // Send the query via the mediator to get the result
             var response = result.Adapt<GetProductResponse>(); // Map the result to the response DTO
             return Results.Ok(response); // Return HTTP 200 OK with the response
