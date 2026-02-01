@@ -1,14 +1,23 @@
+# Docker Compose file to run PostgreSQL databases for Catalog and Basket services
+
+#version to use by docker compose
 version: '3.4'
 
+#define the services/containers to be run
 services:
   catalogDB:
     image: postgres:17
+  basketDB:
+    image: postgres:17
 
+#This is to build the catalog api service from the Dockerfile
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
     build:
       context: .
       dockerfile: Services/Catalog/Catalog.API/Dockerfile
 
+#volumes used for persisting database data
 volumes:
   postgres_catalog:
+  postgres_basket:
