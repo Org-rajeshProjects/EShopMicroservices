@@ -10,6 +10,9 @@ services:
   basketDB:
     image: postgres:17
 
+  distributedcache:
+    image: redis
+
 #This is to build the catalog api service from the Dockerfile
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
@@ -17,7 +20,14 @@ services:
       context: .
       dockerfile: Services/Catalog/Catalog.API/Dockerfile
 
+  basket.api:
+    image: ${DOCKER_REGISTRY-}basketapi
+    build:
+      context: .
+      dockerfile: Services/Basket/Basket.API/Dockerfile
+
 #volumes used for persisting database data
+  
 volumes:
   postgres_catalog:
   postgres_basket:

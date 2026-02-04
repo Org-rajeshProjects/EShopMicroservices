@@ -1,5 +1,8 @@
 
 using BuildingBlocks.Exceptions.Handlers;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +28,28 @@ builder.Services.AddMarten(opts =>
 }).UseLightweightSessions();//Lightweight session for performance.
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();//Register the basket repository for data access.
+builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();//Decorate the basket repository with caching functionality using Scrutor.Decorate.
+
+//Manually register the CachedBasketRepository with Decorator pattern to add caching functionality.
+//builder.Services.AddScoped<IBasketRepository>(provider =>
+//{
+//    var basketRepository = provider.GetRequiredService<BasketRepository>();
+//    return new CachedBasketRepository(basketRepository, provider.GetRequiredService<IDistributedCache>());
+//});
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    //options.InstanceName = "Basket_";
+});//Register Redis distributed cache for caching basket data.
 
 //Register custom exception handler
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
+//Adding health checks
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("Database")!)//Here we add a health check for PostgreSQL from "AspNetCore.HealthCheks.NpgSql" using the connection string from configuration. !means we are sure it is not null.
+    .AddRedis(builder.Configuration.GetConnectionString("Redis")!);//Add Redis health check from "AspNetCore.HealthCheks.Redis"  package.
 
 var app = builder.Build();
 
@@ -38,4 +60,9 @@ app.MapCarter();
 
 app.UseExceptionHandler(options => { });
 
+app.UseHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = _ => true,//Check all registered health checks.
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});//Map health check endpoint at /health with a custom response writer.
 app.Run();
