@@ -28,6 +28,14 @@ services:
 
 #volumes used for persisting database data
   
+  discount.grpc:
+    image: ${DOCKER_REGISTRY-}discountgrpc
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.Grpc/Dockerfile
+
 volumes:
   postgres_catalog:
   postgres_basket:
+
+

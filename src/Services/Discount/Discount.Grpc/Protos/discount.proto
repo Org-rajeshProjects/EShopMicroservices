@@ -1,0 +1,44 @@
+syntax = "proto3";// The syntax version of Protocol Buffers being used.
+
+option csharp_namespace = "Discount.Grpc.Protos";// The C# namespace for the generated code.
+
+package discount;// The discount service definition. We will use this to generate server and client code.
+
+//The Discount service defination
+service DiscountPrtoService{
+	// The RPC methods for the Discount service CRUD operations.
+	rpc GetDiscount (GetDiscountRequest) returns (CouponModel);
+	rpc CreateDiscount (CreateDiscountRequest) returns (CouponModel);
+	rpc updateDiscount (updateDiscountRequest) returns (CouponModel);
+	rpc DeleteDiscount (DeleteDiscountRequest) returns (DeleteDiscountResponse);
+
+}
+
+// The CouponModel message definition
+message CouponModel{
+	int32 Id = 1;
+	string ProductName = 2;
+	string Description = 3;
+	double Amount = 4;
+}
+
+// The request and response messages for the Discount service methods
+message GetDiscountRequest{
+	string ProductName = 1;
+}
+
+message CreateDiscountRequest{
+	CouponModel Coupon = 1;
+}
+
+message updateDiscountRequest{
+	CouponModel Coupon = 1;
+}
+
+message DeleteDiscountRequest{
+	string ProductName = 1;
+}
+
+message DeleteDiscountResponse{
+	bool Success = 1;
+}
