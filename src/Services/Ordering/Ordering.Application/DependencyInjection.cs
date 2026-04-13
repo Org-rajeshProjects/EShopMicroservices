@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Ordering.Application;
 
@@ -8,6 +9,11 @@ public static class DependencyInjection
     {
         // Register application services here
         // e.g., MediatR handlers, AutoMapper profiles, etc.
+
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+        });
         return services;
     }
 }
