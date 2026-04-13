@@ -7,11 +7,16 @@ version: '3.4'
 services:
   catalogDB:
     image: postgres:17
+  
   basketDB:
     image: postgres:17
 
   distributedcache:
     image: redis
+
+  orderdb:
+    image: mcr.microsoft.com/mssql/server
+
 
 #This is to build the catalog api service from the Dockerfile
   catalog.api:
