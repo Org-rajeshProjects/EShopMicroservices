@@ -9,7 +9,7 @@ public class GetOrdersByNameHandler(IApplicationDbContext dbContext) : IQueryHan
     public async Task<GetOrdersByNameResult> Handle(GetOrdersbyNameQuery request, CancellationToken cancellationToken)
     {
 
-        var orders = await dbContext.Orders.Include(o => o.OrderItems).AsNoTracking().Where(o => o.OrderName.Value.Contains(request.Name)).OrderBy(o => o.OrderName).ToListAsync(cancellationToken);
+        var orders = await dbContext.Orders.Include(o => o.OrderItems).AsNoTracking().Where(o => o.OrderName.Value.Contains(request.Name)).OrderBy(o => o.OrderName.Value).ToListAsync(cancellationToken);
 
 
         return new GetOrdersByNameResult(orders.ToOrderDtoList());
